@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pandas as pd
+import numpy as np
 from typing import List, Dict, Any
 
 class OrderGenerator(ABC):
@@ -243,7 +244,6 @@ class BettingAgainstIVOLOrderGenerator(OrderGenerator):
         spy_data = data.get('SPY')
         if spy_data is None:
             raise ValueError("SPY data is required for IVOL calculation.")
-       
         spy_returns = spy_data['Adj Close'].pct_change()
         spy_returns = spy_returns.dropna()
 
@@ -264,9 +264,4 @@ class BettingAgainstIVOLOrderGenerator(OrderGenerator):
             all_orders.extend(orders)
 
 
-        return pd.DataFrame(all_orders)
-
-
-
-
-
+        return all_orders
