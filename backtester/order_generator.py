@@ -92,6 +92,8 @@ class BettingAgainstBetaOrderGenerator(OrderGenerator):
         # long bottom decile, short top decile of beta stocks
         for ticker in low_beta_tickers:
             quantity = int(self.starting_portfolio_value * low_beta_weight / decile_size)
+            max_allocation = self.starting_portfolio_value * 0.02
+            quantity = min(quantity, max_allocation)
             orders.append({
                 "date": date,
                 "type": "BUY",
@@ -102,6 +104,8 @@ class BettingAgainstBetaOrderGenerator(OrderGenerator):
 
         for ticker in high_beta_tickers:
             quantity = int(self.starting_portfolio_value * high_beta_weight / decile_size)
+            max_allocation = self.starting_portfolio_value * 0.02
+            quantity = min(quantity, max_allocation)
             orders.append({
                 "date": date,
                 "type": "SELL",
@@ -209,14 +213,17 @@ class BettingAgainstIVOLOrderGenerator(OrderGenerator):
 
 
         # Ensure IVOL neutrality with equal weighting
-        total_low_ivol_weight = 1 / (avg_low_ivol + avg_high_ivol)
-        total_high_ivol_weight = -1 / (avg_low_ivol + avg_high_ivol)
+        scaling_factor = 0.5  # Can use to reduce leverage
+        total_low_ivol_weight = scaling_factor / (avg_low_ivol + avg_high_ivol)
+        total_high_ivol_weight = -scaling_factor / (avg_low_ivol + avg_high_ivol)
         orders = []
 
 
         # Long low IVOL, short high IVOL stocks
         for ticker in low_ivol_tickers:
-            quantity = int(self.starting_portfolio_value * total_low_ivol_weight / decile_size)
+            quantity = int(100 * total_low_ivol_weight / decile_size)
+            max_allocation = self.starting_portfolio_value * 0.01 
+            quantity = min(quantity, max_allocation)
             orders.append({
                 "date": date,
                 "type": "BUY",
@@ -227,7 +234,9 @@ class BettingAgainstIVOLOrderGenerator(OrderGenerator):
 
 
         for ticker in high_ivol_tickers:
-            quantity = int(self.starting_portfolio_value * total_high_ivol_weight / decile_size)
+            quantity = int(100 * total_high_ivol_weight / decile_size)
+            max_allocation = self.starting_portfolio_value * 0.01
+            quantity = min(quantity, max_allocation)
             orders.append({
                 "date": date,
                 "type": "SELL",
